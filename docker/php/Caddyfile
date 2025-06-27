@@ -1,0 +1,13 @@
+{
+  # глобальная опция — не пытаться делать HTTPS
+  auto_https off
+}
+
+:80 {
+  root * /app/public
+  try_files {path} {path}/ /index.php?{query}
+
+  php_server
+
+  file_server
+}

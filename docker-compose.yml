@@ -1,0 +1,48 @@
+version: "3.3"
+services:
+  php:
+    build:
+      context: .
+      dockerfile: docker/php/Dockerfile
+    image: franken_app:latest
+    env_file: .env
+    volumes:
+      - ./:/app:delegated
+      - caddy_data:/data/caddy
+      - caddy_config:/config/caddy
+      # (нужна папка certs, пока не нужна для HTTP-only)
+      # - ./certs:/app/certs:ro
+    ports:
+      - "${APP_HTTP_PORT:-8087}:80"
+    depends_on:
+      - postgres
+      - rabbitmq
+      - redis
+
+  postgres:
+    image: postgres:15
+    restart: always
+    env_file: .env
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    ports:
+      - "${PG_PORT:-5432}:5432"
+
+  rabbitmq:
+    image: rabbitmq:3-management
+    restart: always
+    env_file: .env
+    ports:
+      - "${RMQ_PORT:-5672}:5672"
+      - "${RMQ_MGMT_PORT:-15672}:15672"
+
+  redis:
+    image: redis:7
+    restart: always
+    ports:
+      - "${REDIS_PORT:-6379}:6379"
+
+volumes:
+  pgdata:
+  caddy_data:
+  caddy_config:
